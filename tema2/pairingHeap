@@ -1,0 +1,117 @@
+#include <iostream>
+#include <fstream>
+
+using namespace std;
+
+ifstream fin("mergeheap.in");
+ofstream fout("mergeheap.out");
+
+class Node {
+    int data;
+    Node* child;
+    Node* next;
+public:
+    Node(int data) {
+        this->data = data;
+        child = nullptr;
+        next = nullptr;
+    }
+    void setChild(Node* child) {
+        this->child = child;
+    }
+    void setNext(Node* next) {
+        this->next = next;
+    }
+    int getData() {
+        return data;
+    }
+    Node* getChild() {
+        return child;
+    }
+    Node* getNext() {
+        return next;
+    }
+};
+
+class PairingHeap {
+    Node* root;
+public:
+    PairingHeap() {
+        root = nullptr;
+    }
+    void insert(int data) {
+        Node* node = new Node(data);
+        if (root == nullptr) {
+            root = node;
+        } else {
+            root = merge(root, node);
+        }
+    }
+    Node* merge(Node* node1, Node* node2) {
+        if (node1 == nullptr) {
+            return node2;
+        }
+        if (node2 == nullptr) {
+            return node1;
+        }
+        if (node1->getData() < node2->getData()) {
+            Node* temp = node1;
+            node1 = node2;
+            node2 = temp;
+        }
+        Node* child = node1->getChild();
+        if (child == nullptr) {
+            node1->setChild(node2);
+        } else {
+            while (child->getNext() != nullptr) {
+                child = child->getNext();
+            }
+            child->setNext(node2);
+        }
+        return node1;
+    }
+    int getMax() {
+        return root->getData();
+    }
+    void deleteMax()
+        {
+            Node* current = root->getChild();
+            root = nullptr;
+            while(current!=nullptr)
+            {
+                Node* next = current->getNext();
+                current->setNext(nullptr);
+                root = merge(root,current);
+                current = next;
+            }
+        }
+    void Join(PairingHeap& heap)
+    {
+        root = merge(root,heap.root);
+    }
+};
+
+int main() {
+    int n, q;
+    fin>>n;
+    PairingHeap heap[101];
+    fin>>q;
+    for(int i=0;i<q;i++){
+        int a,b,c;
+        fin>>a;
+        if(a==1){
+            fin>>b>>c;
+            heap[b].insert(c);
+        }
+        else if(a==2){
+            fin>>b;
+            fout<<heap[b].getMax()<<endl;
+            heap[b].deleteMax();
+        }
+        else if(a==3){
+            fin>>b>>c;
+            heap[b].Join(heap[c]);
+        }
+        }
+    return 0;
+    }
